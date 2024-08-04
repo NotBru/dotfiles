@@ -9,11 +9,11 @@ fi
 
 
 ### APT INSTALLABLES
-if [[ "$(cat /var/log/apt/history.log | grep -Pzo '(?<=Start-Date: )\d{4}-\d{2}-\d{2}(?=  \d{2}:\d{2}:\d{2}\nCommandline: apt upgrade)')" != "$(date +%Y-%m-%d)" ]]; then
-  if [[ -z "UPDATE" ]]; then
+if [[ -z "UPDATE" ]]; then
+  if [[ "$(cat /var/log/apt/history.log | grep -Pzo '(?<=Start-Date: )\d{4}-\d{2}-\d{2}(?=  \d{2}:\d{2}:\d{2}\nCommandline: apt upgrade)')" != "$(date +%Y-%m-%d)" ]]; then
     sudo add-apt-repository -y ppa:phoerious/keepassxc
     sudo apt update && sudo apt upgrade -y
-    sudo apt install -y git firefox keepassxc
+    sudo apt install -y git firefox keepassxc neovim
   fi
 fi
 
@@ -38,7 +38,7 @@ if [[ -z "$(which pyenv)" ]]; then
   echo "$PYENV_EXPORT" >> $HOME/.bashrc
 fi
 
-if [[ -z "$(python --version | grep 'command not found')" ]]; then
+if [[ -n "$(python --version | grep 'command not found')" ]]; then
   sudo apt-get install -y \
     make build-essential libssl-dev zlib1g-dev libbz2-dev \
     libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
@@ -87,11 +87,15 @@ if [[ -z "$(which kmonad)" ]]; then
   
   sudo mv kmonad /usr/bin
   cd $PWD
+
+  sudo groupadd uinput
+  sudo usermod -aG input,uinput username  # This will require re-loggin
+  echo 'KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"' | sudo tee /etc/udev/rules.d/99-kmonad.rules >/dev/null
+  sudo udevadm control --reload-rules
+  sudo udevadm trigger
+
+  echo 'source $HOME/is/scripts/venvs/keyboard_watch/bin/activate && python $HOME/is/scripts/code/keyboard_watch.py &' >> $HOME/.profile
 fi
 
-
-### Quality of life
-if [[ -z "$(which nvim)" ]]; then
-  sudo apt install \
-    neovim
-fi
+rsync -a "$PWD/scripts/" "$HOME/is/scripts/"
+rsync -a "$PWD/config/" "$HOME/.config/"

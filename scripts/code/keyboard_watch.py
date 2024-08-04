@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from colorama import Fore, Style
 from logging import Logger
 from pathlib import Path
@@ -9,12 +7,12 @@ import os
 import uuid
 
 def read_template():
-    with open(Path.home() / "is" / "kb" / "template.kbd", "r") as inf:
+    with open(Path.home() / ".config" / "keyboard_watch" / "template.kbd", "r") as inf:
         return inf.read()
 
 
 pid = os.getpid()
-with open(Path.home() / "is" / "kb" / "pid", "w") as outf:
+with open(Path().home() / "is" / "scripts" / "pids" / "keyboard_watch.pid", "w") as outf:
     outf.write(f"{pid}")
 
 
