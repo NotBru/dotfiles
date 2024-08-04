@@ -1,0 +1,116 @@
+#| --------------------------------------------------------------------------
+
+                          KMonad: US ansi 60% template
+
+  This file contains the `defsrc` configuration for a standard US-ansi 60%
+  keyboard. Modelled on a standard DAS-keyboard 100% with the numpad, function
+  keys, arrows, and home-cluster removed. Copy out the 'defsrc' layer to start
+  your own keyboard configuration. Copy out the `deflayer` template to easily
+  start a new layer with matching `transparent` buttons.
+
+(deflayer name
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _              _              _    _    _    _
+)
+
+  -------------------------------------------------------------------------- |#
+
+(defcfg
+  input  (device-file "{}")
+  output (uinput-sink "{}"
+    "/bin/sleep 1 && /bin/setxkbmap -layout us -variant altgr-intl")
+  cmp-seq ralt
+  cmp-seq-delay 5
+  fallthrough false
+  allow-cmd false
+)
+
+(defsrc
+  esc
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lalt                     spc
+)
+
+(defalias lse  (layer-switch emode))
+(defalias lte  (layer-toggle emode))
+(defalias ec   (tap-hold-next 300 esc lctl))
+(defalias int  (tap-next spc ralt))
+(defalias tm
+    (tap-hold-next
+        300
+        tab
+        (around
+            lmet
+            (layer-toggle i3mode)
+        )
+    )
+)
+(defalias ls (around lmet esc))
+(defalias ss (sticky-key 1000 rsft))
+ 
+(deflayer imode
+  @lse
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  @tm  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  @ec  a    s    d    f    g    h    j    k    l    ;    '    ret
+  @lte z    x    c    v    b    n    m    ,    .    /    rsft
+  @ls                      @int
+)
+
+(deflayer i3mode
+  grv
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  @tm  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  @ec  a    s    d    f    g    h    j    k    l    ;    '    ret
+  XX   z    x    c    v    b    n    m    ,    .    /    rsft
+  XX                       lsft
+)
+
+(defalias lsi  (layer-switch imode))
+(defalias lsg  (layer-switch gmode))
+(defalias src  (around lsft ssrq))
+(defalias sa   (sticky-key 1000 lalt))
+(defalias knv 
+    (
+        tap-macro
+        (around lctl ;)
+        (layer-switch keynav)
+    )
+)
+
+(deflayer emode
+  XX
+  XX   f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12  XX
+  @tm  XX   XX   XX   XX   XX   home pgup @lsi XX   XX   XX   XX   XX
+  XX   @src ssrq XX   XX   @lsg left down up   rght @knv XX   XX
+  XX   bspc del  XX   XX   end  pgdn @sa  XX   XX   XX   XX
+  XX                       XX
+)
+ 
+(deflayer gmode
+  @lse
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  @ec  a    s    d    f    g    left down up   rght ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  XX                       spc
+)
+
+(defalias ste  (tap-macro spc @lse))
+(defalias ete  (tap-macro esc @lse))
+(defalias sce  (tap-macro ;   @lse))
+ 
+(deflayer keynav
+  XX
+  XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX  XX
+  XX   XX   XX   XX   XX   XX   y    u    i    XX   XX   XX   XX  XX
+  @ete XX   s    d    XX   XX   h    j    k    l    @sce XX   XX
+  XX   XX   XX   XX   XX   b    n    XX   XX   XX   XX   rsft
+  XX                       @ste
+)
