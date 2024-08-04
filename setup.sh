@@ -13,7 +13,7 @@ if [[ -z "UPDATE" ]]; then
   if [[ "$(cat /var/log/apt/history.log | grep -Pzo '(?<=Start-Date: )\d{4}-\d{2}-\d{2}(?=  \d{2}:\d{2}:\d{2}\nCommandline: apt upgrade)')" != "$(date +%Y-%m-%d)" ]]; then
     sudo add-apt-repository -y ppa:phoerious/keepassxc
     sudo apt update && sudo apt upgrade -y
-    sudo apt install -y git firefox keepassxc neovim
+    sudo apt install -y git firefox keepassxc neovim pipx
   fi
 fi
 
@@ -99,3 +99,5 @@ fi
 
 rsync -a "$PWD/scripts/" "$HOME/is/scripts/"
 rsync -a "$PWD/config/" "$HOME/.config/"
+
+# TODO: make keyboard_watch into poetry project
