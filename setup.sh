@@ -9,6 +9,10 @@ fi
 
 mkdir -p $HOME/is/ $HOME/is/git
 
+### MANUALLY INSTALLED WITHOUT REQS
+chmod u+x update.sh
+./update.sh
+
 ### DOCKER REPOSITORIES
 if [[ -z "$(which docker)" ]]; then
 # Add Docker's official GPG key:
@@ -33,7 +37,7 @@ fi
 
 ### APT INSTALLABLES
 if [[ -z "UPDATE" ]]; then
-  ESSENTIALS='git firefox keepassxc neovim i3 i3blocks pipx'
+  ESSENTIALS='git firefox keepassxc i3 i3blocks pipx'
   DOCKER='docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin' # required for KMonad
   OTHERS='gnome-screenshot telegram-desktop'
   sudo apt update && sudo apt upgrade -y
