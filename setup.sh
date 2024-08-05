@@ -10,8 +10,11 @@ fi
 mkdir -p $HOME/is/ $HOME/is/git
 
 ### MANUALLY INSTALLED WITHOUT REQS
-chmod u+x upgrade.sh
-./upgrade.sh
+if [[ -z "$(which nvim)" ]]; then
+  curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage
+  chmod u+x nvim.appimage
+  sudo mv nvim.appimage /usr/bin/nvim
+fi
 
 ### DOCKER REPOSITORIES
 if [[ -z "$(which docker)" ]]; then
@@ -39,10 +42,18 @@ fi
 if [[ -z "UPDATE" ]]; then
   ESSENTIALS='git firefox keepassxc i3 i3blocks pipx'
   DOCKER='docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin' # required for KMonad
-  OTHERS='gnome-screenshot telegram-desktop'
+  SCRIPT_DEPS='brightnessctl gnome-screenshot'
+  OTHERS='telegram-desktop'
   sudo apt update && sudo apt upgrade -y
-  sudo apt install -y $ESSENTIALS $DOCKER $OTHERS
+  sudo apt install -y $ESSENTIALS $SCRIPT_DEPS $DOCKER $OTHERS
+  sudo usermod -aG video kriatne  # required by brightnessctl
 fi
+
+if [[ -z "$(cat $HOME/.bashrc | grep 'Created by `pipx`')" ]]; then
+  pipx ensurepath
+fi
+# Make sure it's PATHed even on first run
+PATH="$PATH:/home/kriatne/.local/bin"
 
 
 ### FIREFOX'S PROFILE
@@ -70,7 +81,7 @@ if [[ -n "$(python --version | grep 'command not found')" ]]; then
     make build-essential libssl-dev zlib1g-dev libbz2-dev \
     libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
     xz-utils tk-dev libffi-dev liblzma-dev python3-openssl git
-  LATEST_PYTHON="$(pyenv install --l | grep -Po '  \K3\.\d+\.\d+$' | sort -V | tail -n1)"
+  LATEST_PYTHON="$(pyenv install -l | grep -Po '  \K3\.\d+\.\d+$' | sort -V | tail -n1)"
   pyenv install $LATEST_PYTHON
   pyenv global $LATEST_PYTHON
 fi
@@ -78,7 +89,7 @@ fi
 
 ### KMONAD
 if [[ -z "$(which kmonad)" ]]; then
-	if [[ -z "$(systemctl status docker.service | grep '(running)')" ]]; then
+  if [[ -z "$(systemctl status docker.service | grep '(running)')" ]]; then
     echo 'ERROR: docker service not up. May need to restart.' 1>&2
     exit 1
   fi
@@ -96,7 +107,7 @@ if [[ -z "$(which kmonad)" ]]; then
   cd $PWD
 
   sudo groupadd uinput
-  sudo usermod -aG input,uinput username  # This will require re-loggin
+  sudo usermod -aG input,uinput kriatne # required by kmonad
   echo 'KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"' | sudo tee /etc/udev/rules.d/99-kmonad.rules >/dev/null
   sudo udevadm control --reload-rules
   sudo udevadm trigger
@@ -139,6 +150,11 @@ if [[ -z "$(which aws)" ]]; then
   cd $PWD
 fi
 
+if [[ -z "$(which poetry)" ]]; then
+  echo installing
+  pipx install poetry
+fi
+
 ### CONFIGS AND SCRIPTS
 rsync -a "$PWD/scripts/" "$HOME/is/scripts/"
 rsync -a "$PWD/config/" "$HOME/.config/"
@@ -147,3 +163,6 @@ rsync -a "$PWD/config/" "$HOME/.config/"
 # TODO: find a way to check whether to run apt update
 # TODO: screen DPI-dependent font size in config
 # TODO: i3-lock!!
+
+
+echo 'Make sure to source `.bashrc` or re-open a terminal for updated ENV vars'

@@ -191,8 +191,8 @@ bindsym $mod+u exec ~/is/scripts/volctl unmute
 bindsym $mod+i exec ~/is/scripts/volctl -
 bindsym $mod+o exec ~/is/scripts/volctl +
 bindsym $mod+m exec ~/is/scripts/volctl mute
-bindsym $mod+Shift+i exec ~/is/scripts/br_ctl - & pkill -SIGRTMIN+3 i3blocks
-bindsym $mod+Shift+o exec ~/is/scripts/br_ctl + & pkill -SIGRTMIN+2 i3blocks
+bindsym $mod+Shift+i exec python ~/is/scripts/code/br_ctl.py - && pkill -SIGRTMIN+3 i3blocks
+bindsym $mod+Shift+o exec python ~/is/scripts/code/br_ctl.py + && pkill -SIGRTMIN+3 i3blocks
 bindsym $mod+p exec mpc toggle
 bindsym $mod+Shift+greater exec mpc next
 bindsym $mod+Shift+less exec mpc prev
