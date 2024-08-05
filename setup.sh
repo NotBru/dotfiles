@@ -10,8 +10,8 @@ fi
 mkdir -p $HOME/is/ $HOME/is/git
 
 ### MANUALLY INSTALLED WITHOUT REQS
-chmod u+x update.sh
-./update.sh
+chmod u+x upgrade.sh
+./upgrade.sh
 
 ### DOCKER REPOSITORIES
 if [[ -z "$(which docker)" ]]; then
@@ -145,4 +145,5 @@ rsync -a "$PWD/config/" "$HOME/.config/"
 
 # TODO: make keyboard_watch into poetry project
 # TODO: find a way to check whether to run apt update
+# TODO: screen DPI-dependent font size in config
 # TODO: i3-lock!!
