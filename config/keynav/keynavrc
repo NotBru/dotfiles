@@ -1,0 +1,32 @@
+ctrl+semicolon start, grid 3x3
+Escape end
+space warp,click 1,end
+h cell-select 1x2
+j cell-select 2x3
+k cell-select 2x1
+l cell-select 3x2
+y cell-select 1x1
+u cell-select 3x1
+b cell-select 1x3
+n cell-select 3x3
+i cell-select 2x2
+shift+h move-left
+shift+j move-down
+shift+k move-up
+shift+l move-right
+shift+y move-left,move-up
+shift+u move-right,move-up
+shift+b move-left,move-down
+shift+n move-right,move-down
+semicolon warp,end 
+1 click 1
+2 click 2
+3 click 3
+Up click 4
+Down click 5
+Left click 6
+Right click 7
+d click 4
+s click 5
+a click 6
+f click 7
