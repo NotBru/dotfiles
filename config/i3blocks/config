@@ -34,12 +34,9 @@ markup=none
 # The second parameter overrides the mixer selection
 # See the script for details.
 [volume]
-label=VOL
-#label=♪
-instance=Master
-#instance=PCM
+command=python $HOME/is/scripts/code/vol.py
 interval=once
-signal=10
+signal=2
 
 # Memory usage
 #
@@ -118,8 +115,8 @@ interval=1
 # Date Time
 #
 [time]
-command=date '+%Y-%m-%d %H:%M:%S'
-interval=5
+command=date '+%Y%m%d%H%M'
+interval=15
 
 # Generic media player support
 #

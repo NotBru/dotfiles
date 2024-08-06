@@ -42,7 +42,7 @@ fi
 if [[ -z "UPDATE" ]]; then
   ESSENTIALS='git firefox keepassxc i3 i3blocks pipx'
   DOCKER='docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin' # required for KMonad
-  SCRIPT_DEPS='brightnessctl gnome-screenshot'
+  SCRIPT_DEPS='pulsemixer brightnessctl gnome-screenshot mpc'
   OTHERS='telegram-desktop'
   sudo apt update && sudo apt upgrade -y
   sudo apt install -y $ESSENTIALS $SCRIPT_DEPS $DOCKER $OTHERS
@@ -162,6 +162,7 @@ rsync -a "$PWD/config/" "$HOME/.config/"
 # TODO: make keyboard_watch into poetry project
 # TODO: find a way to check whether to run apt update
 # TODO: screen DPI-dependent font size in config
+# TODO: volume
 # TODO: i3-lock!!
 
 

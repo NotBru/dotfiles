@@ -187,10 +187,10 @@ exec --no-startup-id ~/is/scripts/pointer_reverse reset inverted
 exec --no-startup-id ~/is/scripts/keyboard_watch
 
 bindsym $mod+Escape exec ~/is/scripts/kbloop
-bindsym $mod+u exec ~/is/scripts/volctl unmute
-bindsym $mod+i exec ~/is/scripts/volctl -
-bindsym $mod+o exec ~/is/scripts/volctl +
-bindsym $mod+m exec ~/is/scripts/volctl mute
+bindsym $mod+u exec python ~/is/scripts/code/vol.py unmute
+bindsym $mod+m exec python ~/is/scripts/code/vol.py mute
+bindsym $mod+i exec python ~/is/scripts/code/vol.py -
+bindsym $mod+o exec python ~/is/scripts/code/vol.py +
 bindsym $mod+Shift+i exec python ~/is/scripts/code/br_ctl.py - && pkill -SIGRTMIN+3 i3blocks
 bindsym $mod+Shift+o exec python ~/is/scripts/code/br_ctl.py + && pkill -SIGRTMIN+3 i3blocks
 bindsym $mod+p exec mpc toggle
