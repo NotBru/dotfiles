@@ -28,6 +28,10 @@ command=/usr/share/i3blocks/$BLOCK_NAME
 separator_block_width=15
 markup=none
 
+[doing]
+command=cat ~/is/scripts/state/doing/current
+interval=1
+
 # Volume indicator
 #
 # The first parameter sets the step (and units to display)
@@ -104,7 +108,7 @@ signal=2
 # interval=30
 
 [brightness]
-command=python /home/kriatne/is/scripts/code/br_ctl.py
+command=python ~/is/scripts/code/br_ctl.py
 interval=once
 signal=3
 
