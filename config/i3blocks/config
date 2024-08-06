@@ -112,6 +112,10 @@ command=python ~/is/scripts/code/br_ctl.py
 interval=once
 signal=3
 
+[gpu]
+command=system76-power graphics | tr -d '\n' | sed 's/hybrid/d*/g;s/integrated/  /g;s/nvidia/ d/g;s/compute/d?/g' && echo GPU
+interval=once
+
 [battery]
 command=acpi | grep -v " 0%" | head -n1 | grep -Po 'Battery \d+: \K.*\d+' | sed 's/Charging, /^/g;s/Discharging,//g;s/, 0\?/ (/g;s/[0-9]+ /\)/g;s/$/)/g'
 interval=1
