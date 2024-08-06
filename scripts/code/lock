@@ -1,0 +1,4 @@
+#!/bin/sh
+gnome-screenshot -f /tmp/scrsh.png
+i3lock -n -u -i /tmp/scrsh.png
+echo login OK | systemd-cat

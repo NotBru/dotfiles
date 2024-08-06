@@ -162,8 +162,6 @@ rsync -a "$PWD/config/" "$HOME/.config/"
 # TODO: make keyboard_watch into poetry project
 # TODO: find a way to check whether to run apt update
 # TODO: screen DPI-dependent font size in config
-# TODO: volume
-# TODO: i3-lock!!
 
 
 echo 'Make sure to source `.bashrc` or re-open a terminal for updated ENV vars'
