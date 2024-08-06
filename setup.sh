@@ -84,6 +84,7 @@ if [[ -n "$(python --version | grep 'command not found')" ]]; then
   LATEST_PYTHON="$(pyenv install -l | grep -Po '  \K3\.\d+\.\d+$' | sort -V | tail -n1)"
   pyenv install $LATEST_PYTHON
   pyenv global $LATEST_PYTHON
+  pip install ipython matplotlib numpy pandas polars requests  # Essentials IMHO
 fi
 
 
