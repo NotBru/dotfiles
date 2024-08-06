@@ -155,13 +155,22 @@ if [[ -z "$(which poetry)" ]]; then
   pipx install poetry
 fi
 
+
 ### CONFIGS AND SCRIPTS
 rsync -a "$PWD/scripts/" "$HOME/is/scripts/"
 rsync -a "$PWD/config/" "$HOME/.config/"
 
+
+# if [[ "$(cat /etc/systemd/logind.conf | grep '#?HandleLidSwitch=.*')" != "HandleLidSwitch=ignore" ]]; then
+  # cat /etc/systemd/logind.conf \
+    # | sed 's/#\?HandleLidSwitch=.*/HandleLidSwitch=ignore/g' \
+    # | sudo tee /etc/systemd/logind.conf >/dev/null
+# fi
+
+echo 'Make sure to source `.bashrc` or re-open a terminal for updated ENV vars'
+echo 'Restart systemd: sudo service systemd-logind restart'
+
 # TODO: make keyboard_watch into poetry project
 # TODO: find a way to check whether to run apt update
 # TODO: screen DPI-dependent font size in config
-
-
-echo 'Make sure to source `.bashrc` or re-open a terminal for updated ENV vars'
+# TODO: find out how to ignore lidswitch without thrashing the user login
