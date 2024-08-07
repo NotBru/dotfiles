@@ -40,7 +40,7 @@ fi
 
 ### APT INSTALLABLES
 if [[ -z "UPDATE" ]]; then
-  ESSENTIALS='git firefox keepassxc i3 i3blocks pipx compton'
+  ESSENTIALS='git firefox keepassxc i3 i3blocks pipx compton ffmpeg'
   DOCKER='docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin' # required for KMonad
   SCRIPT_DEPS='pulsemixer brightnessctl gnome-screenshot mpc feh'
   OTHERS='telegram-desktop'
