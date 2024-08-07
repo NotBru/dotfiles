@@ -1,0 +1,2 @@
+colorscheme vim
+set notermguicolors
