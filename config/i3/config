@@ -182,7 +182,7 @@ bar {
 
 exec --no-startup-id keynav
 exec --no-startup-id compton
-exec --no-startup-id ~/is/scripts/reset_screens
+exec --no-startup-id python ~/is/scripts/code/screen_watch.py
 exec --no-startup-id ~/is/scripts/pointer_reverse reset inverted
 exec --no-startup-id ~/is/scripts/keyboard_watch
 
