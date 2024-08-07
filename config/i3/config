@@ -199,7 +199,7 @@ bindsym $mod+Shift+less exec mpc prev
 bindsym $mod+Shift+equal move scratchpad
 bindsym $mod+equal scratchpad show, resize set 1366 768, move position 0 0
 bindsym $mod+Shift+e exec ~/is/scripts/code/lock
-bindsym --release Print exec ~/is/scripts/split_screen_screenshot
+bindsym --release Print exec python ~/is/scripts/code/split_screen_screenshot.py
 bindsym --release Shift+Print exec gnome-screenshot -a -f ~/Pictures/Screenshot\ from\ `date +"%Y-%m-%d"`\ `date +"%T"`.png
 bindsym $mod+Shift+u move workspace to output right
 bindsym $mod+Shift+d move workspace to output left
