@@ -162,14 +162,15 @@ rsync -a "$PWD/scripts/" "$HOME/is/scripts/"
 rsync -a "$PWD/config/" "$HOME/.config/"
 
 
-# if [[ "$(cat /etc/systemd/logind.conf | grep '#?HandleLidSwitch=.*')" != "HandleLidSwitch=ignore" ]]; then
-  # cat /etc/systemd/logind.conf \
-    # | sed 's/#\?HandleLidSwitch=.*/HandleLidSwitch=ignore/g' \
-    # | sudo tee /etc/systemd/logind.conf >/dev/null
-# fi
+if [[ "$(cat /etc/systemd/logind.conf | grep '#?HandleLidSwitch=.*')" != "HandleLidSwitch=ignore" ]]; then
+  cat /etc/systemd/logind.conf \
+    | sed -e 's/#\?HandleLidSwitch=.*/HandleLidSwitch=ignore/g' \
+    	  -e 's/#\?HAndleLidSwitchExternalPower=.*/HandleLidSwitchExternalPower=ignore/g' \
+    | sudo tee /etc/systemd/logind.conf >/dev/null
+fi
 
 echo 'Make sure to source `.bashrc` or re-open a terminal for updated ENV vars'
-echo 'Restart systemd: sudo service systemd-logind restart'
+echo 'Restart computer in order to apply changes to lid switch behaviour'
 
 # TODO: make keyboard_watch into poetry project
 # TODO: find a way to check whether to run apt update
