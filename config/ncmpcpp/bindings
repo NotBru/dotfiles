@@ -219,13 +219,13 @@ def_key "e"
 #def_key "space"
 #  toggle_visualization_type
 #
-def_key "e"
+def_key "w"
   delete_playlist_items
 
-def_key "e"
+def_key "w"
   delete_browser_items
 
-def_key "e"
+def_key "w"
   delete_stored_playlist
 
 def_key "l"
