@@ -167,6 +167,7 @@ if [[ "$(cat /etc/systemd/logind.conf | grep -Po '#?HandleLidSwitch=.*')" != "Ha
     | sudo tee /etc/systemd/logind.conf >/dev/null
 fi
 
+### NCMPCPP
 if [[ -z "$(which ncmpcpp)" ]]; then
   # From https://gist.github.com/lirenlin/f92c8e849530ebf66604
   # Slightly modified
@@ -177,6 +178,16 @@ if [[ -z "$(which ncmpcpp)" ]]; then
   touch $HOME/.mpd/{mpd.db,mpd.log,mpd.pid,mpdstate}
 
   mv $HOME/.config/mpd.conf $HOME/.mpd/mpd.conf
+fi
+
+### QUTEBROWSER
+if [[ -z "$(which qutebrowser)" ]]; then
+  cd $HOME/is/git
+  git clone https://github.com/qutebrowser/qutebrowser.git
+  cd qutebrowser
+  python3 scripts/mkenv.py
+  { echo '#!/bin/bash' && echo "$HOME/is/git/qutebrowser/.venv/bin/python3 -m qutebrowser \"\$@\""; } > $HOME/.local/bin/qutebrowser
+  chmod u+x $HOME/.local/bin/qutebrowser
 fi
 
 echo 'Make sure to source `.bashrc` or re-open a terminal for updated ENV vars'
