@@ -185,6 +185,7 @@ exec --no-startup-id compton
 exec --no-startup-id python ~/is/scripts/code/screen_watch.py
 exec --no-startup-id ~/is/scripts/pointer_reverse reset inverted
 exec --no-startup-id ~/is/scripts/keyboard_watch
+exec --no-startup-id ~/is/scripts/code/.blame/bin/python ~/is/scripts/code/blame.py
 
 bindsym $mod+Escape exec ~/is/scripts/kbloop
 bindsym $mod+u exec python ~/is/scripts/code/vol.py unmute
