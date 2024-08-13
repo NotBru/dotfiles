@@ -42,7 +42,7 @@ fi
 if [[ -z "$UPDATE" ]]; then
   ESSENTIALS='git firefox keepassxc i3 i3blocks pipx compton ffmpeg'
   DOCKER='docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin' # required for KMonad
-  SCRIPT_DEPS='pulsemixer brightnessctl gnome-screenshot mpc feh'
+  SCRIPT_DEPS='pulsemixer brightnessctl gnome-screenshot mpc feh xclip libnotify-bin'
   OTHERS='telegram-desktop'
   sudo apt update && sudo apt upgrade -y
   sudo apt install -y $ESSENTIALS $SCRIPT_DEPS $DOCKER $OTHERS
@@ -152,7 +152,6 @@ if [[ -z "$(which aws)" ]]; then
 fi
 
 if [[ -z "$(which poetry)" ]]; then
-  echo installing
   pipx install poetry
 fi
 
@@ -161,12 +160,23 @@ fi
 rsync -a "$PWD/scripts/" "$HOME/is/scripts/"
 rsync -a "$PWD/config/" "$HOME/.config/"
 
-
-if [[ "$(cat /etc/systemd/logind.conf | grep '#?HandleLidSwitch=.*')" != "HandleLidSwitch=ignore" ]]; then
+if [[ "$(cat /etc/systemd/logind.conf | grep -Po '#?HandleLidSwitch=.*')" != "HandleLidSwitch=ignore" ]]; then
   cat /etc/systemd/logind.conf \
     | sed -e 's/#\?HandleLidSwitch=.*/HandleLidSwitch=ignore/g' \
     	  -e 's/#\?HAndleLidSwitchExternalPower=.*/HandleLidSwitchExternalPower=ignore/g' \
     | sudo tee /etc/systemd/logind.conf >/dev/null
+fi
+
+if [[ -z "$(which ncmpcpp)" ]]; then
+  # From https://gist.github.com/lirenlin/f92c8e849530ebf66604
+  # Slightly modified
+  sudo apt install mpd mpc ncmpcpp
+
+  mkdir $HOME/.mpd
+  mkdir $HOME/.mpd/playlists
+  touch $HOME/.mpd/{mpd.db,mpd.log,mpd.pid,mpdstate}
+
+  mv $HOME/.config/mpd.conf $HOME/.mpd/mpd.conf
 fi
 
 echo 'Make sure to source `.bashrc` or re-open a terminal for updated ENV vars'

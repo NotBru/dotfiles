@@ -120,6 +120,10 @@ interval=once
 command=acpi | grep -v " 0%" | head -n1 | grep -Po 'Battery \d+: \K.*\d+' | sed 's/Charging, /^/g;s/Discharging,//g;s/, 0\?/ (/g;s/[0-9]+ /\)/g;s/$/)/g'
 interval=1
 
+[battery-notify]
+command=battery_life() { acpi | grep -v " 0%" | grep Discharging | head -n1 | grep -Po '\d+(?=%)'; }; if [ "$(battery_life)" -lt 5 ]; then notify-send "BATTERY LOW ($(battery_life))"; fi
+interval=30
+
 # Date Time
 #
 [time]
