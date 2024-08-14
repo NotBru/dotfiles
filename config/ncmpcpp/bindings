@@ -168,6 +168,9 @@ def_key "j"
   scroll_down
 
 def_key "e"
+  edit_playlist_name
+
+def_key "e"
   select_item
   scroll_down
 
@@ -428,9 +431,6 @@ def_key "h"
 #
 #def_key "e"
 #  edit_directory_name
-#
-#def_key "e"
-#  edit_playlist_name
 #
 #def_key "e"
 #  edit_lyrics
