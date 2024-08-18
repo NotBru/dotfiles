@@ -1,0 +1,9 @@
+[Unit]
+Description=Keynav
+
+[Service]
+ExecStart=keynav
+Restart=always
+
+[Install]
+WantedBy=default.target

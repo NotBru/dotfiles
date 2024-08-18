@@ -112,8 +112,6 @@ if [[ -z "$(which kmonad)" ]]; then
   echo 'KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"' | sudo tee /etc/udev/rules.d/99-kmonad.rules >/dev/null
   sudo udevadm control --reload-rules
   sudo udevadm trigger
-
-  echo 'source $HOME/is/scripts/venvs/keyboard_watch/bin/activate && python $HOME/is/scripts/code/keyboard_watch.py &' >> $HOME/.profile
 fi
 
 ### RUST
@@ -137,7 +135,6 @@ if [[ -z "$(which keynav)" ]]; then
   make keynav
   sudo mv keynav /usr/bin
 
-  echo 'keynav &' >> $HOME/.profile
   cd $PWD
 fi
 
@@ -193,7 +190,17 @@ fi
 echo 'Make sure to source `.bashrc` or re-open a terminal for updated ENV vars'
 echo 'Restart computer in order to apply changes to lid switch behaviour'
 
-# TODO: make keyboard_watch into poetry project
+if [[ -z "$(dir $HOME/.config/systemd/user)" ]]; then
+  mkdir -p ~/.config/systemd
+  mkdir -p ~/.config/systemd/user
+fi
+
+SEDCODE=$(echo -n "$HOME/is/scripts/code" | sed 's/\//\\\//g')
+for fn in $PWD/services/*.service; do
+  bn="$(basename $fn)"
+  cat $fn | sed "s/\$CODE/$SEDCODE/g" | tee "$HOME/.config/systemd/user/$bn" > /dev/null
+done
+
 # TODO: find a way to check whether to run apt update
 # TODO: screen DPI-dependent font size in config
 # TODO: find out how to ignore lidswitch without thrashing the user login

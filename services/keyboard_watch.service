@@ -1,0 +1,9 @@
+[Unit]
+Description=Watches keyboard interfaces and remaps them with KMonad
+
+[Service]
+ExecStart=$CODE/.keyboard_watch/bin/python $CODE/keyboard_watch.py
+Restart=always
+
+[Install]
+WantedBy=default.target
