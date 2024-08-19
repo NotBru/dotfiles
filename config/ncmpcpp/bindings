@@ -178,6 +178,9 @@ def_key "E"
   select_item
   scroll_up
 
+def_key "ctrl-e"
+  select_item
+
 #def_key "["
 #  scroll_up_album
 #
