@@ -180,6 +180,7 @@ bar {
         status_command i3blocks
 }
 
+exec --no-startup-id feh --bg-max ~/.scrsvr.png
 exec --no-startup-id keynav
 exec --no-startup-id ~/is/scripts/code/.keyboard_watch/bin/python ~/is/scripts/code/keyboard_watch.py
 exec --no-startup-id compton
@@ -201,6 +202,7 @@ bindsym $mod+Shift+less exec mpc prev
 bindsym $mod+Shift+equal move scratchpad
 bindsym $mod+equal scratchpad show, resize set 1366 768, move position 0 0
 bindsym $mod+Shift+e exec ~/is/scripts/code/lock
+bindsym $mod+Shift+s exec python ~/is/scripts/code/screen_watch.py toggle
 bindsym --release Print exec python ~/is/scripts/code/split_screen_screenshot.py
 bindsym --release Shift+Print exec gnome-screenshot -a -f ~/Pictures/Screenshot\ from\ `date +"%Y-%m-%d"`\ `date +"%T"`.png
 bindsym $mod+Shift+u move workspace to output right

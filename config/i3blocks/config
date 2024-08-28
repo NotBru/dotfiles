@@ -112,6 +112,10 @@ command=python ~/is/scripts/code/br_ctl.py
 interval=once
 signal=3
 
+[screen-watch]
+command=python ~/is/scripts/code/screen_watch.py query
+interval=1
+
 [gpu]
 command=system76-power graphics | tr -d '\n' | sed 's/hybrid/d*/g;s/integrated/  /g;s/nvidia/ d/g;s/compute/d?/g' && echo GPU
 interval=once
@@ -129,6 +133,10 @@ interval=30
 [time]
 command=date '+%Y%m%d%H%M'
 interval=15
+
+[blame]
+command=~/is/scripts/code/.blame/bin/python ~/is/scripts/code/blame.py
+interval=300
 
 # Generic media player support
 #
