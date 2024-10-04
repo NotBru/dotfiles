@@ -40,7 +40,7 @@ fi
 
 ### APT INSTALLABLES
 if [[ -z "$UPDATE" ]]; then
-  ESSENTIALS='git firefox keepassxc i3 i3blocks pipx compton ffmpeg'
+  ESSENTIALS='git firefox keepassxc i3 i3blocks pipx compton ffmpeg gdb'
   DOCKER='docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin' # required for KMonad
   SCRIPT_DEPS='pulsemixer brightnessctl gnome-screenshot mpc feh xclip libnotify-bin'
   OTHERS='telegram-desktop'
@@ -204,3 +204,19 @@ done
 # TODO: find a way to check whether to run apt update
 # TODO: screen DPI-dependent font size in config
 # TODO: find out how to ignore lidswitch without thrashing the user login
+
+# NOTE: These instructions only work for 64-bit Debian-based
+# Linux distributions such as Ubuntu, Mint etc.
+
+if [[ -z "$(which signal)" ]]; then
+    # 1. Install our official public software signing key:
+    wget -O- https://updates.signal.org/desktop/apt/keys.asc | gpg --dearmor > signal-desktop-keyring.gpg
+    cat signal-desktop-keyring.gpg | sudo tee /usr/share/keyrings/signal-desktop-keyring.gpg > /dev/null
+
+    # 2. Add our repository to your list of repositories:
+    echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/signal-desktop-keyring.gpg] https://updates.signal.org/desktop/apt xenial main' |\
+      sudo tee /etc/apt/sources.list.d/signal-xenial.list
+
+    # 3. Update your package database and install Signal:
+    sudo apt update && sudo apt install signal-desktop
+fi

@@ -23,7 +23,7 @@ def write(path: Path, content: str) -> None:
 
 def query_xrandr():
     stdout = str(sp.Popen(["xrandr"], stdout=sp.PIPE).stdout.read(), encoding="utf8")
-    screens = re.findall(r'(.*?) connected .*? (?:(\d+)+x(\d+)\+(\d+)\+(\d+))?', stdout)
+    screens = re.findall(r'(.*?) connected (?:primary )?(?:(\d+)+x(\d+)\+(\d+)\+(\d+))?', stdout)
     return "\n".join(" ".join(line) for line in screens)
 
 def reset_screens(screens: str):
@@ -48,6 +48,7 @@ def scan():
         reset_screens(screens)
     if screens != (queried := query_xrandr()):
         print("Resetting screens")
+        screens = query_xrandr()
         reset_screens(screens)
 
 def loop():
