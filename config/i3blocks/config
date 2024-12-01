@@ -39,7 +39,7 @@ interval=1
 # See the script for details.
 [volume]
 command=python $HOME/is/scripts/code/vol.py
-interval=once
+interval=1
 signal=2
 
 # Memory usage
