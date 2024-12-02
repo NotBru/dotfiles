@@ -1,4 +1,7 @@
 #!/bin/bash
+read -p "Username: " USERNAME
+echo $USERNAME
+
 PWD="$(pwd)"
 
 setxkbmap -layout us -variant altgr-intl
@@ -46,14 +49,14 @@ if [[ -z "$UPDATE" ]]; then
   OTHERS='telegram-desktop'
   sudo apt update && sudo apt upgrade -y
   sudo apt install -y $ESSENTIALS $SCRIPT_DEPS $DOCKER $OTHERS
-  sudo usermod -aG video kriatne  # required by brightnessctl
+  sudo usermod -aG video $USERNAME  # required by brightnessctl
 fi
 
 if [[ -z "$(cat $HOME/.bashrc | grep 'Created by `pipx`')" ]]; then
   pipx ensurepath
 fi
 # Make sure it's PATHed even on first run
-PATH="$PATH:/home/kriatne/.local/bin"
+PATH="$PATH:/home/$USERNAME/.local/bin"
 
 
 ### FIREFOX'S PROFILE
@@ -108,7 +111,7 @@ if [[ -z "$(which kmonad)" ]]; then
   cd $PWD
 
   sudo groupadd uinput
-  sudo usermod -aG input,uinput kriatne # required by kmonad
+  sudo usermod -aG input,uinput $USERNAME # required by kmonad
   echo 'KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"' | sudo tee /etc/udev/rules.d/99-kmonad.rules >/dev/null
   sudo udevadm control --reload-rules
   sudo udevadm trigger
