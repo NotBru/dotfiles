@@ -171,7 +171,7 @@ fi
 if [[ -z "$(which ncmpcpp)" ]]; then
   # From https://gist.github.com/lirenlin/f92c8e849530ebf66604
   # Slightly modified
-  sudo apt install mpd mpc ncmpcpp
+  sudo apt install -y mpd mpc ncmpcpp
 
   mkdir $HOME/.mpd
   mkdir $HOME/.mpd/playlists
@@ -221,5 +221,5 @@ if [[ -z "$(which signal)" ]]; then
       sudo tee /etc/apt/sources.list.d/signal-xenial.list
 
     # 3. Update your package database and install Signal:
-    sudo apt update && sudo apt install signal-desktop
+    sudo apt update && sudo apt install -y signal-desktop
 fi
