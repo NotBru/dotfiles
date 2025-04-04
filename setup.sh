@@ -1,174 +1,114 @@
 #!/bin/bash
-read -p "Username: " USERNAME
-echo $USERNAME
-
 PWD="$(pwd)"
+LOGS="$HOME/setup.log"
 
-setxkbmap -layout us -variant altgr-intl
+sudo echo "Running setup. Dumping to \"$LOGS\""
+rm "$LOGS" 2>/dev/null
 
-if [ ! -f $HOME/.ssh/id_ed25519 ]; then
-  ssh-keygen -t ed25519 -N '' -f $HOME/.ssh/id_ed25519
-fi
+report_error_and_exit() {
+  echo FAILED
+  echo "Logs can be found in \"$LOGS\""
+  exit 1
+}
 
-mkdir -p $HOME/is/ $HOME/is/git
+install_nvim() {
+  APPIMAGE_NAME="nvim-linux-x86_64.appimage"
+  # TODO: fetch architecture automatically
+  curl -LO https://github.com/neovim/neovim/releases/download/nightly/$APPIMAGE_NAME
+  chmod u+x $APPIMAGE_NAME
+  sudo mv $APPIMAGE_NAME /usr/bin/nvim
+  if [[ ! "$(nvim --version)" ]]; then
+    exit 1
+  fi
+}
 
-### MANUALLY INSTALLED WITHOUT REQS
-if [[ -z "$(which nvim)" ]]; then
-  curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage
-  chmod u+x nvim.appimage
-  sudo mv nvim.appimage /usr/bin/nvim
-fi
-
-### DOCKER REPOSITORIES
-if [[ -z "$(which docker)" ]]; then
-# Add Docker's official GPG key:
-  sudo apt install -y ca-certificates curl
+install_docker() {
+  sudo apt-get update
+  sudo apt-get install ca-certificates curl
   sudo install -m 0755 -d /etc/apt/keyrings
   sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
   sudo chmod a+r /etc/apt/keyrings/docker.asc
-
-  # Add the repository to Apt sources:
+  
   echo \
     "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+    $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
     sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-  sudo apt install -y 
-fi
+  sudo apt-get update
+  sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+}
 
+install_stack() {
+  curl -sSL https://get.haskellstack.org/ | sh
+}
 
-### EXTRA REPOSITORIES
-if [[ -z "$(which keepassxc)" ]]; then
-    sudo add-apt-repository -y ppa:phoerious/keepassxc
-fi
-
-### APT INSTALLABLES
-if [[ -z "$UPDATE" ]]; then
-  ESSENTIALS='git firefox keepassxc i3 i3blocks pipx compton ffmpeg gdb'
-  DOCKER='docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin' # required for KMonad
-  SCRIPT_DEPS='pulsemixer brightnessctl gnome-screenshot mpc feh xclip libnotify-bin'
-  OTHERS='telegram-desktop'
-  sudo apt update && sudo apt upgrade -y
-  sudo apt install -y $ESSENTIALS $SCRIPT_DEPS $DOCKER $OTHERS
-  sudo usermod -aG video $USERNAME  # required by brightnessctl
-fi
-
-if [[ -z "$(cat $HOME/.bashrc | grep 'Created by `pipx`')" ]]; then
-  pipx ensurepath
-fi
-# Make sure it's PATHed even on first run
-PATH="$PATH:/home/$USERNAME/.local/bin"
-
-
-### FIREFOX'S PROFILE
-## # Unused: no time to figure out how to seamlessly install a specific plugin and I
-## # don't want to just replace the whole profile
-## DEFAULT_PROFILE="(cat $HOME/.mozilla/firefox/profiles.ini  | grep -Pz '\[Profile0\]\n(.*?\n)*Path=\K.*')"
-
-
-### PYENV
-if [[ -z "$(which pyenv)" ]]; then
-  curl https://pyenv.run | bash
-
-  PYENV_EXPORT='
-  export PYENV_ROOT="$HOME/.pyenv"
-  [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-  eval "$(pyenv init -)"
-  eval "$(pyenv virtualenv-init -)"'
-
-  echo "$PYENV_EXPORT" >> $HOME/.profile
-  echo "$PYENV_EXPORT" >> $HOME/.bashrc
-fi
-
-if [[ -n "$(python --version | grep 'command not found')" ]]; then
-  sudo apt install -y \
-    make build-essential libssl-dev zlib1g-dev libbz2-dev \
-    libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
-    xz-utils tk-dev libffi-dev liblzma-dev python3-openssl git
-  LATEST_PYTHON="$(pyenv install -l | grep -Po '  \K3\.\d+\.\d+$' | sort -V | tail -n1)"
-  pyenv install $LATEST_PYTHON
-  pyenv global $LATEST_PYTHON
-  pip install ipython matplotlib numpy pandas polars requests  # Essentials IMHO
-fi
-
-
-### KMONAD
-if [[ -z "$(which kmonad)" ]]; then
-  if [[ -z "$(systemctl status docker.service | grep '(running)')" ]]; then
-    echo 'ERROR: docker service not up. May need to restart.' 1>&2
-    exit 1
+install_kmonad() {
+  cd "$HOME/is/git"
+  if [ ! -d "$HOME/is/git" ]; then
+    git clone https://github.com/kmonad/kmonad.git
   fi
-
-  cd $HOME/is/git
-  git clone https://github.com/kmonad/kmonad.git
   cd kmonad
 
-  pwd
-  sudo docker build -t kmonad-builder .
-  sudo docker run --rm -it -v ${PWD}:/host/ kmonad-builder bash -c 'cp -vp /root/.local/bin/kmonad /host/'
-  sudo docker rmi kmonad-builder
-  
-  sudo mv kmonad /usr/bin
-  cd $PWD
+  stack install
+  cd "$PWD"
 
   sudo groupadd uinput
-  sudo usermod -aG input,uinput $USERNAME # required by kmonad
+  sudo usermod -aG input,uinput "$(whoami)" # required by kmonad
   echo 'KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"' | sudo tee /etc/udev/rules.d/99-kmonad.rules >/dev/null
   sudo udevadm control --reload-rules
   sudo udevadm trigger
-fi
+}
 
-### RUST
-if [[ -z "$(which rustup)" ]]; then
+apt_install() {
+  sudo add-apt-repository -y ppa:phoerious/keepassxc
+  ESSENTIALS='git firefox keepassxc i3 i3blocks pipx compton ffmpeg gdb'
+  SCRIPT_DEPS='pulsemixer brightnessctl gnome-screenshot mpc feh xclip libnotify-bin'
+  OTHERS='ncal jq fzf'
+
+  sudo apt update && sudo apt upgrade -y
+  sudo apt install -y $ESSENTIALS $SCRIPT_DEPS $OTHER
+  sudo usermod -aG video "$(whoami)"
+
+  if [[ -z "$(cat $HOME/.bashrc | grep 'Created by `pipx`')" ]]; then
+    pipx ensurepath >>"$LOGS" 2>>"$LOGS"
+  fi
+}
+
+install_python() {
+  if [[ -z "$(which pyenv)" ]]; then
+    curl https://pyenv.run | bash
+  
+    PYENV_EXPORT='
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"'
+  
+    echo "$PYENV_EXPORT" >> $HOME/.profile
+    echo "$PYENV_EXPORT" >> $HOME/.bashrc
+  fi
+  
+  if [[ -n "$(python --version | grep 'command not found')" ]]; then
+    sudo apt install -y \
+      make build-essential libssl-dev zlib1g-dev libbz2-dev \
+      libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
+      xz-utils tk-dev libffi-dev liblzma-dev python3-openssl git
+    LATEST_PYTHON="$(pyenv install -l | grep -Po '  \K3\.\d+\.\d+$' | sort -V | tail -n1)"
+    pyenv install $LATEST_PYTHON
+    pyenv global $LATEST_PYTHON
+    pip install ipython matplotlib numpy pandas polars requests  # Essentials IMHO
+  fi
+}
+
+install_rust() {
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-fi
+  source "$HOME/.bashrc"
+}
 
-### EXTRAS
-# dua
-if [[ -z "$(which dua)" ]]; then
+cargo_install() {
   cargo install dua-cli
-fi
+}
 
-# keynav
-if [[ -z "$(which keynav)" ]]; then
-  sudo apt install -y \
-    libxinerama-dev libxrandr-dev libcairo2-dev libxdo-dev
-  cd $HOME/is/git
-  git clone https://github.com/jordansissel/keynav.git
-  cd keynav
-  make keynav
-  sudo mv keynav /usr/bin
-
-  cd $PWD
-fi
-
-# aws-cli
-if [[ -z "$(which aws)" ]]; then
-  mkdir -p /tmp/install-aws-cli
-  cd /tmp/install-aws-cli
-  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-  unzip awscliv2.zip
-  sudo ./aws/install
-  cd $PWD
-fi
-
-if [[ -z "$(which poetry)" ]]; then
-  pipx install poetry
-fi
-
-
-### CONFIGS AND SCRIPTS
-rsync -a "$PWD/scripts/" "$HOME/is/scripts/"
-rsync -a "$PWD/config/" "$HOME/.config/"
-
-if [[ "$(cat /etc/systemd/logind.conf | grep -Po '#?HandleLidSwitch=.*')" != "HandleLidSwitch=ignore" ]]; then
-  cat /etc/systemd/logind.conf \
-    | sed -e 's/#\?HandleLidSwitch=.*/HandleLidSwitch=ignore/g' \
-    	  -e 's/#\?HAndleLidSwitchExternalPower=.*/HandleLidSwitchExternalPower=ignore/g' \
-    | sudo tee /etc/systemd/logind.conf >/dev/null
-fi
-
-### NCMPCPP
-if [[ -z "$(which ncmpcpp)" ]]; then
+install_ncmpcpp() {
   # From https://gist.github.com/lirenlin/f92c8e849530ebf66604
   # Slightly modified
   sudo apt install -y mpd mpc ncmpcpp
@@ -177,49 +117,159 @@ if [[ -z "$(which ncmpcpp)" ]]; then
   mkdir $HOME/.mpd/playlists
   touch $HOME/.mpd/{mpd.db,mpd.log,mpd.pid,mpdstate}
 
-  mv $HOME/.config/mpd.conf $HOME/.mpd/mpd.conf
+  cp $PWD/config/mpd.conf $HOME/.mpd/mpd.conf
+}
+
+install_telegram() {
+  RESULT="$(curl -s https://api.github.com/repos/telegramdesktop/tdesktop/releases/latest | jq -r '.assets[] | select(.label=="Linux 64 bit: Binary")')"
+  NAME="$(echo "$RESULT" | jq -r '.name')"
+  URL="$(echo "$RESULT" | jq -r '.browser_download_url')"
+  wget "$URL" -O "$NAME"
+  tar xf "$NAME"
+  rm "$NAME"
+  sudo mv Telegram/Telegram "/usr/bin/telegram"
+  sudo mv Telegram/Updater "/usr/bin/telegram-updater"
+  rm -r Telegram
+}
+
+symlink_configs() {
+  echo Burp
+}
+
+#----------------------------------------------------------------------------------------------------------------------------
+
+## Stage: setup git dir
+mkdir -p $HOME/is/git
+PATH="$PATH:$HOME/.local/bin"
+
+## Stage: keyboard layout
+echo -n "Persist layout in ~/.profile... "
+if [[ -z "$(cat $HOME/.profile | grep setxkbmap)" ]]; then
+  echo "setxkbmap -layout us -variant altgr-intl" >> $HOME/.profile
+  setxkbmap -layout us -variant altgr-intl
+  echo OK
+else
+  echo "OK (already)"
 fi
 
-### QUTEBROWSER
-if [[ -z "$(which qutebrowser)" ]]; then
-  cd $HOME/is/git
-  git clone https://github.com/qutebrowser/qutebrowser.git
-  cd qutebrowser
-  python3 scripts/mkenv.py
-  { echo '#!/bin/bash' && echo "$HOME/is/git/qutebrowser/.venv/bin/python3 -m qutebrowser \"\$@\""; } > $HOME/.local/bin/qutebrowser
-  chmod u+x $HOME/.local/bin/qutebrowser
+## Stage: Key
+echo -n 'Generating public ed25519 key... '
+if [ ! -f $HOME/.ssh/id_ed25519 ]; then
+  ssh-keygen -t ed25519 -N '' -f $HOME/.ssh/id_ed25519 >>"$LOGS" || report_error_and_exit
+  echo OK
+else
+  echo 'OK (already)'
 fi
 
-echo 'Make sure to source `.bashrc` or re-open a terminal for updated ENV vars'
-echo 'Restart computer in order to apply changes to lid switch behaviour'
-
-if [[ -z "$(dir $HOME/.config/systemd/user)" ]]; then
-  mkdir -p ~/.config/systemd
-  mkdir -p ~/.config/systemd/user
+## Stage: install nvim
+echo -n 'Install nvim... '
+if [[ ! "$(which nvim)" || ! "$(nvim --version)" ]]; then
+  install_nvim >>"$LOGS" 2>>"$LOGS" || report_error_and_exit
+  echo OK
+else
+  echo 'OK (already)'
 fi
 
-SEDCODE=$(echo -n "$HOME/is/scripts/code" | sed 's/\//\\\//g')
-for fn in $PWD/services/*.service; do
-  bn="$(basename $fn)"
-  cat $fn | sed "s/\$CODE/$SEDCODE/g" | tee "$HOME/.config/systemd/user/$bn" > /dev/null
-done
+### Stage: install docker
+#echo -n 'Install docker... '
+#if [[ ! "$(which docker)" || ! "$(docker --version)" ]]; then
+  #install_docker >>"$LOGS" 2>>"$LOGS" || report_error_and_exit
+  #echo OK
+#else
+  #echo 'OK (already)'
+#fi
+#
+### Stage: check docker service
+#if [[ -z "$(systemctl status docker.service | grep '(running)')" ]]; then
+  #echo 'ERROR: Docker service is not up, but a restart may fix this.'
+  #exit
+#fi
 
-# TODO: find a way to check whether to run apt update
-# TODO: screen DPI-dependent font size in config
-# TODO: find out how to ignore lidswitch without thrashing the user login
+## Stage: install stack
+echo -n "Installing stack... "
+if [[ ! "$(which stack)" ]]; then
+  install_stack >>"$LOGS" 2>>"$LOGS" || report_error_and_exit
+  echo OK
+else
+  echo 'OK (already)'
+fi
 
-# NOTE: These instructions only work for 64-bit Debian-based
-# Linux distributions such as Ubuntu, Mint etc.
+## Stage: install kmonad
+echo -n 'Install kmonad... '
+if [[ ! "$(which kmonad)" ]]; then
+  install_kmonad >>"$LOGS" 2>>"$LOGS" || report_error_and_exit
+  echo OK
+else
+  echo 'OK (already)'
+fi
 
-if [[ -z "$(which signal)" ]]; then
-    # 1. Install our official public software signing key:
-    wget -O- https://updates.signal.org/desktop/apt/keys.asc | gpg --dearmor > signal-desktop-keyring.gpg
-    cat signal-desktop-keyring.gpg | sudo tee /usr/share/keyrings/signal-desktop-keyring.gpg > /dev/null
+## Stage: apt install...
+echo -n 'Run apt... '
+if [[ ! "$(which keepassxc)" ]]; then
+  apt_install >>"$LOGS" 2>>"$LOGS" || report_error_and_exit
+  echo OK
+else
+  echo 'OK (already)'
+fi
 
-    # 2. Add our repository to your list of repositories:
-    echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/signal-desktop-keyring.gpg] https://updates.signal.org/desktop/apt xenial main' |\
-      sudo tee /etc/apt/sources.list.d/signal-xenial.list
+## Stage: install python:
+echo -n "Install python... "
+if [[ ! "$(which python)" ]]; then
+  install_python >>"$LOGS" 2>>"$LOGS" || report_error_and_exit
+  echo OK
+else
+  echo 'OK (already)'
+fi
 
-    # 3. Update your package database and install Signal:
-    sudo apt update && sudo apt install -y signal-desktop
+echo -n "Install rust... "
+if [[ ! "$(which rustup)" ]]; then
+  install_rust >>"$LOGS" 2>>"$LOGS" || report_error_and_exit
+  echo OK
+else
+  echo 'OK (already)'
+fi
+
+echo -n "Cargo install... "
+if [[ ! "$(which dua)" ]]; then
+  cargo_install >>"$LOGS" 2>>"$LOGS" || report_error_and_exit
+  echo OK
+else
+  echo 'OK (already)'
+fi
+
+# TODO: symlinks
+
+echo -n "Disabling lid switch... "
+if [[ "$(cat /etc/systemd/logind.conf | grep -Po '#?HandleLidSwitch=.*')" != "HandleLidSwitch=ignore" ]]; then
+  cat /etc/systemd/logind.conf \
+    | sed -e 's/#\?HandleLidSwitch=.*/HandleLidSwitch=ignore/g' \
+    	  -e 's/#\?HAndleLidSwitchExternalPower=.*/HandleLidSwitchExternalPower=ignore/g' \
+    | sudo tee /etc/systemd/logind.conf >/dev/null
+  echo OK
+else
+  echo 'OK (already)'
+fi
+
+echo -n "Install ncmpcpp... "
+if [[ ! "$(which ncmpcpp)" ]]; then
+  install_ncmpcpp >>"$LOGS" 2>>"$LOGS" || report_error_and_exit
+  echo OK
+else
+  echo 'OK (already)'
+fi
+
+echo -n "Install telegram... "
+if [[ ! "$(which telegram)" ]]; then
+  install_telegram >>"$LOGS" 2>>"$LOGS" || report_error_and_exit
+  echo OK
+else
+  echo 'OK (already)'
+fi
+
+echo -n "Symlinking to repo... "
+if [ ! -d "$HOME/.config/i3" ]; then
+  symlink_configs >>"$LOGS" 2>>"$LOGS" || report_error_and_exit
+  echo OK
+else
+  echo 'OK (already)'
 fi
