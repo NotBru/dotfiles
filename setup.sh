@@ -62,7 +62,7 @@ apt_install() {
   sudo add-apt-repository -y ppa:phoerious/keepassxc
   ESSENTIALS='git firefox keepassxc i3 i3blocks pipx compton ffmpeg gdb'
   SCRIPT_DEPS='pulsemixer brightnessctl gnome-screenshot mpc feh xclip libnotify-bin'
-  OTHERS='ncal jq'
+  OTHERS='ncal jq fzf'
 
   sudo apt update && sudo apt upgrade -y
   sudo apt install -y $ESSENTIALS $SCRIPT_DEPS $OTHER
@@ -130,6 +130,10 @@ install_telegram() {
   sudo mv Telegram/Telegram "/usr/bin/telegram"
   sudo mv Telegram/Updater "/usr/bin/telegram-updater"
   rm -r Telegram
+}
+
+symlink_configs() {
+  echo Burp
 }
 
 #----------------------------------------------------------------------------------------------------------------------------
@@ -257,6 +261,14 @@ fi
 echo -n "Install telegram... "
 if [[ ! "$(which telegram)" ]]; then
   install_telegram >>"$LOGS" 2>>"$LOGS" || report_error_and_exit
+  echo OK
+else
+  echo 'OK (already)'
+fi
+
+echo -n "Symlinking to repo... "
+if [ ! -d "$HOME/.config/i3" ]; then
+  symlink_configs >>"$LOGS" 2>>"$LOGS" || report_error_and_exit
   echo OK
 else
   echo 'OK (already)'
