@@ -87,7 +87,7 @@ eval "$(pyenv virtualenv-init -)"'
     echo "$PYENV_EXPORT" >> $HOME/.bashrc
   fi
   
-  if [[ -n "$(python --version | grep 'command not found')" ]]; then
+  if [[ -n "$(python --version 2>&1 | grep 'not found')" ]]; then
     sudo apt install -y \
       make build-essential libssl-dev zlib1g-dev libbz2-dev \
       libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
