@@ -62,7 +62,7 @@ apt_install() {
   sudo add-apt-repository -y ppa:phoerious/keepassxc
   ESSENTIALS='git firefox keepassxc i3 i3blocks pipx compton ffmpeg gdb'
   SCRIPT_DEPS='pulsemixer brightnessctl gnome-screenshot mpc feh xclip libnotify-bin'
-  OTHERS='ncal jq fzf'
+  OTHERS='ncal jq fzf jq'
 
   sudo apt update && sudo apt upgrade -y
   sudo apt install -y $ESSENTIALS $SCRIPT_DEPS $OTHER
@@ -87,7 +87,7 @@ eval "$(pyenv virtualenv-init -)"'
     echo "$PYENV_EXPORT" >> $HOME/.bashrc
   fi
   
-  if [[ -n "$(python --version | grep 'command not found')" ]]; then
+  if [[ -n "$(python --version 2>&1 | grep 'not found')" ]]; then
     sudo apt install -y \
       make build-essential libssl-dev zlib1g-dev libbz2-dev \
       libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
